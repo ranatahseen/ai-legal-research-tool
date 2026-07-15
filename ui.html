@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PI Case Stress-Tester</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #efeee9;
+  --surface:   #ffffff;
+  --surface-2: #f5f4f1;
+  --surface-3: #eceae6;
+  --border:    rgba(0,0,0,0.08);
+  --border-md: rgba(0,0,0,0.14);
+  --accent:    #1a5fa5;
+  --accent-lt: #e8f1fb;
+  --red:       #c53030;
+  --red-lt:    #fff0f0;
+  --amber:     #8a5c08;
+  --amber-lt:  #fef9ed;
+  --green:     #22653f;
+  --green-lt:  #ecf7f1;
+  --text-1:    #181715;
+  --text-2:    #46433f;
+  --text-3:    #79766f;
+  --text-4:    #a8a59e;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.05);
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #111009;
+    --surface:   #1b1a17;
+    --surface-2: #222019;
+    --surface-3: #2b2924;
+    --border:    rgba(255,255,255,0.07);
+    --border-md: rgba(255,255,255,0.12);
+    --accent:    #4a90d9;
+    --accent-lt: #182840;
+    --red:       #f87171;
+    --red-lt:    #2a1212;
+    --amber:     #f5a623;
+    --amber-lt:  #271e07;
+    --green:     #5fbd80;
+    --green-lt:  #0f2018;
+    --text-1:    #f0ece5;
+    --text-2:    #ada9a0;
+    --text-3:    #6b6760;
+    --text-4:    #48453f;
+    --shadow-sm:   0 1px 3px rgba(0,0,0,0.3);
+    --shadow-card: 0 2px 8px rgba(0,0,0,0.4);
+    --shadow-md:   0 6px 20px rgba(0,0,0,0.5);
+  }
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Topbar ─────────────────────────────── */
+#topbar {
+  height: 52px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+}
+
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  flex-shrink: 0;
+  letter-spacing: 0;
+}
+
+.logo-sub {
+  font-size: 13px;
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.sep { width: 1px; height: 18px; background: var(--border-md); margin: 0 3px; }
+
+.badge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 400;
+  background: var(--surface-2);
+  color: var(--text-3);
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text-4);
+  flex-shrink: 0;
+}
+.badge.ok  { color: var(--green); }
+.badge.ok::before  { background: var(--green); }
+.badge.err { color: var(--red); }
+.badge.err::before { background: var(--red); }
+
+.tbtn {
+  font-size: 12.5px;
+  padding: 6px 13px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-md);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.14s;
+  white-space: nowrap;
+}
+.tbtn:hover:not(:disabled) { background: var(--surface-2); color: var(--text-1); }
+.tbtn.danger { color: var(--red); }
+.tbtn.danger:hover:not(:disabled) { background: var(--red-lt); border-color: rgba(197,48,48,0.3); }
+.tbtn:disabled { opacity: 0.38; cursor: not-allowed; }
+
+/* ─── Page layout ────────────────────────── */
+#page {
+  display: flex;
+  height: calc(100vh - 52px);
+  gap: 14px;
+  padding: 14px;
+  overflow: hidden;
+}
+
+/* Left column: case description card + research memo card stacked */
+#col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 58%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Right column: chat card */
+#col-right {
+  width: 42%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Card base ──────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 13px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title-icon {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.card-title-text {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  letter-spacing: -0.005em;
+}
+
+.card-meta {
+  font-size: 11.5px;
+  color: var(--text-4);
+  font-family: 'DM Mono', monospace;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.card-actions .tbtn {
+  font-size: 12px;
+  padding: 5px 11px;
+}
+
+.card-actions-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border-md);
+  margin: 0 2px;
+}
+
+/* ─── Case description card ──────────────── */
+#card-query { flex-shrink: 0; }
+
+.query-body { padding: 16px 18px; }
+
+#query-input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--text-1);
+  font-size: 13.5px;
+  padding: 12px 14px;
+  resize: none;
+  height: 82px;
+  line-height: 1.65;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+#query-input::placeholder { color: var(--text-4); }
+#query-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-lt);
+}
+
+.qactions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.btn-primary {
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: var(--r-sm);
+  border: none;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  font-family: inherit;
+  transition: opacity 0.14s;
+  white-space: nowrap;
+}
+.btn-primary:hover:not(:disabled) { opacity: 0.87; }
+.btn-primary:disabled { opacity: 0.38; cursor: not-allowed; }
+
+.btn-outline {
+  font-size: 12.5px;
+  padding: 7px 14px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-md);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.14s;
+  white-space: nowrap;
+}
+.btn-outline:hover:not(:disabled) { background: var(--surface-2); color: var(--text-1); }
+.btn-outline:disabled { opacity: 0.38; cursor: not-allowed; }
+
+.spinner {
+  display: none;
+  width: 15px; height: 15px;
+  border: 2px solid var(--border-md);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#run-status { font-size: 12px; color: var(--text-3); }
+
+/* ─── Fact bar (inside query card footer) ── */
+#fact-bar {
+  display: none;
+  padding: 10px 18px;
+  border-top: 1px solid var(--border);
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-2);
+  border-radius: 0 0 var(--r-xl) var(--r-xl);
+}
+#fact-bar.visible { display: flex; }
+
+#fact-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-1);
+  font-size: 13px;
+  padding: 7px 12px;
+  height: 34px;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+#fact-input::placeholder { color: var(--text-4); }
+#fact-input:focus { outline: none; border-color: var(--accent); }
+
+/* ─── Memo card ──────────────────────────── */
+#card-memo { flex: 1; min-height: 0; }
+
+#memo-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+#memo-scroll::-webkit-scrollbar { width: 4px; }
+#memo-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* Stats bar */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.scard {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+.scard-label {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-4);
+  margin-bottom: 5px;
+}
+.scard-value {
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--text-1);
+  line-height: 1.1;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scard-value.green { color: var(--green); }
+.scard-value.amber { color: var(--amber); }
+.scard-value.red   { color: var(--red); }
+
+/* Memo sections */
+.msec {
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.msec-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.msec-num {
+  width: 20px; height: 20px;
+  border-radius: 5px;
+  background: var(--accent-lt);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--accent);
+  font-family: 'DM Mono', monospace;
+  flex-shrink: 0;
+}
+.msec-title-text {
+  font-size: 11.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-2);
+}
+.msec-body { padding: 12px 14px; }
+.mbody {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-2);
+}
+.mbody strong, .mbody b { color: var(--text-1); font-weight: 500; }
+.mbody em, .mbody i     { font-style: italic; }
+.mbody p                { margin-bottom: 7px; }
+.mbody p:last-child     { margin-bottom: 0; }
+.mbody ul, .mbody ol    { padding-left: 17px; margin-bottom: 7px; }
+.mbody li               { margin-bottom: 3px; }
+
+.memo-raw {
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px;
+}
+
+/* Hypo banner */
+.hypobanner {
+  background: var(--amber-lt);
+  border: 1px solid rgba(138,92,8,0.2);
+  border-radius: var(--r-sm);
+  padding: 9px 13px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--amber);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hypobanner::before { content: '⟡'; flex-shrink: 0; }
+.hypobanner a { color: var(--accent); text-decoration: none; margin-left: auto; font-size: 11.5px; }
+.hypobanner a:hover { text-decoration: underline; }
+
+/* Empty state */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-4);
+  text-align: center;
+  gap: 7px;
+  padding: 32px;
+  min-height: 120px;
+}
+.empty-icon { font-size: 28px; opacity: 0.3; line-height: 1; margin-bottom: 4px; }
+.empty-title { font-size: 13.5px; color: var(--text-3); font-weight: 400; }
+.empty-sub   { font-size: 12px; }
+
+/* Loading */
+@keyframes loadpulse { 0% { transform: translateX(-100%); } 100% { transform: translateX(350%); } }
+.loading-state { padding: 44px 0; text-align: center; }
+.loading-text  { font-size: 12px; color: var(--text-3); margin-bottom: 14px; }
+.loading-bar   { height: 2px; background: var(--surface-3); border-radius: 1px; overflow: hidden; width: 160px; margin: 0 auto; }
+.loading-bar-inner { height: 100%; background: var(--accent); width: 40%; animation: loadpulse 1.4s ease-in-out infinite; }
+
+/* ─── Chat card ──────────────────────────── */
+#card-chat { flex: 1; }
+
+#chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+#chat-messages::-webkit-scrollbar { width: 4px; }
+#chat-messages::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+.msg { max-width: 87%; }
+.msg.user { align-self: flex-end; }
+.msg.asst { align-self: flex-start; }
+
+.msg-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-4);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.msg-bubble {
+  padding: 9px 13px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.msg.user .msg-bubble {
+  background: var(--accent);
+  color: white;
+  border-radius: var(--r-md) var(--r-md) 4px var(--r-md);
+}
+.msg.asst .msg-bubble {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  border-radius: var(--r-md) var(--r-md) var(--r-md) 4px;
+}
+.msg.asst .msg-bubble strong,
+.msg.asst .msg-bubble b { color: var(--text-1); font-weight: 500; }
+.msg-typing .msg-bubble  { color: var(--text-4); font-style: italic; }
+
+/* Chat footer */
+#chat-footer {
+  padding: 12px 18px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 0 0 var(--r-xl) var(--r-xl);
+  flex-shrink: 0;
+}
+
+.quick-chips {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.chip {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border-md);
+  background: var(--surface);
+  color: var(--text-3);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.14s;
+  white-space: nowrap;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-lt); }
+
+.chat-row { display: flex; gap: 8px; align-items: flex-end; }
+
+#chat-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-sm);
+  color: var(--text-1);
+  font-size: 13px;
+  padding: 8px 12px;
+  resize: none;
+  min-height: 38px;
+  max-height: 160px; overflow-y: auto;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+#chat-input::placeholder { color: var(--text-4); }
+#chat-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-lt);
+}
+
+#chat-send {
+  padding: 8px 15px;
+  border-radius: var(--r-sm);
+  border: none;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  height: 38px;
+  transition: opacity 0.14s;
+  flex-shrink: 0;
+}
+#chat-send:hover:not(:disabled) { opacity: 0.87; }
+#chat-send:disabled { opacity: 0.38; cursor: not-allowed; }
+
+#chat-hint {
+  font-size: 10.5px;
+  color: var(--text-4);
+  margin-top: 7px;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ─── Modal ──────────────────────────────── */
+#modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px);
+}
+#modal-overlay.open { display: flex; }
+
+#modal {
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-xl);
+  padding: 24px;
+  width: 460px;
+  max-width: 95vw;
+  box-shadow: var(--shadow-md);
+}
+.modal-title { font-size: 15px; font-weight: 500; margin-bottom: 5px; color: var(--text-1); }
+.modal-hint  { font-size: 13px; color: var(--text-3); margin-bottom: 14px; line-height: 1.6; }
+.modal-input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-1);
+  font-size: 13.5px;
+  padding: 11px 13px;
+  resize: none;
+  height: 82px;
+  font-family: inherit;
+  line-height: 1.6;
+  margin-bottom: 14px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.modal-input::placeholder { color: var(--text-4); }
+.modal-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-lt);
+}
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* Error state */
+.memo-error {
+  padding: 14px 16px;
+  color: var(--red);
+  font-size: 13px;
+  background: var(--red-lt);
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(197,48,48,0.18);
+}
+
+/* ─── Memo fullscreen overlay ────────────── */
+#memo-fullscreen-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  animation: fsIn 0.18s ease;
+}
+#memo-fullscreen-overlay.open { display: flex; }
+@keyframes fsIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+#memo-fullscreen-card {
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 860px;
+  max-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fsCardIn 0.2s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes fsCardIn {
+  from { transform: scale(0.96); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+#memo-fullscreen-card .card-header {
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+}
+
+#memo-fs-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+#memo-fs-scroll::-webkit-scrollbar { width: 4px; }
+#memo-fs-scroll::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* Expand / minimize icon button */
+.btn-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-md);
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.13s, color 0.13s;
+  flex-shrink: 0;
+  padding: 0;
+}
+.btn-icon:hover { background: var(--surface-2); color: var(--text-1); }
+.btn-icon svg { display: block; }
+
+
+.msg.danger .msg-bubble {
+  background: var(--red-lt);
+  border: 1px solid rgba(197,48,48,0.18);
+  color: var(--text-2);
+  border-radius: var(--r-md) var(--r-md) var(--r-md) 4px;
+}
+.msg.danger .msg-bubble strong,
+.msg.danger .msg-bubble b { color: var(--text-1); }
+
+.msg.whatif .msg-bubble {
+  background: var(--green-lt);
+  border: 1px solid rgba(34,101,63,0.2);
+  color: var(--text-2);
+  border-radius: var(--r-md) var(--r-md) var(--r-md) 4px;
+}
+.msg.whatif .msg-bubble strong,
+.msg.whatif .msg-bubble b { color: var(--text-1); }
+
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div id="topbar">
+  <div class="logo">
+    <span>Case Stress Tester</span>
+    <span class="logo-sub">/ Tahseen Rana</span>
+  </div>
+  <div class="topbar-right">
+
+  </div>
+</div>
+
+<!-- Page -->
+<div id="page">
+
+  <!-- Left column -->
+  <div id="col-left">
+
+    <!-- Case description card -->
+    <div class="card" id="card-query">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-title-text">Case description</span>
+        </div>
+        <div class="card-actions">
+          <button class="tbtn" id="btn-worstcase" disabled onclick="runStressTest()">Worst case</button>
+          <button class="tbtn" id="btn-whatif"    disabled onclick="openWhatif()">What if…</button>
+          <button class="tbtn" id="btn-export"    disabled onclick="runExport()">Export PDF</button>
+          <div class="card-actions-sep"></div>
+          <button class="tbtn danger" onclick="newCase()">New case</button>
+        </div>
+      </div>
+      <div style="padding: 4px 18px 6px; display:flex; align-items:center; gap:6px; min-height:24px;">
+        <span id="run-status" style="font-size:11.5px;color:var(--text-3)"></span>
+      </div>
+      <div class="query-body">
+        <textarea id="query-input" placeholder="Describe your client's case in plain English…"></textarea>
+        <div class="qactions">
+          <button class="btn-primary" id="btn-run" onclick="runQuery()">Run analysis</button>
+          <div class="spinner" id="spinner-query"></div>
+        </div>
+      </div>
+      <div id="fact-bar">
+        <input id="fact-input" type="text" placeholder="Add a fact to refine the analysis… (e.g. client has a prior knee injury)">
+        <button class="btn-outline" id="btn-fact" onclick="addFact()">Add fact</button>
+        <div class="spinner" id="spinner-fact"></div>
+      </div>
+    </div>
+
+    <!-- Research memo card -->
+    <div class="card" id="card-memo">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-title-text">Research memo</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+            <span class="card-meta" id="memo-meta"></span>
+          <button class="btn-icon" id="btn-memo-expand" title="Expand memo" onclick="openMemoFullscreen()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 5V1.5A.5.5 0 0 1 1.5 1H5M9 1h3.5a.5.5 0 0 1 .5.5V5M13 9v3.5a.5.5 0 0 1-.5.5H9M5 13H1.5a.5.5 0 0 1-.5-.5V9"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div id="memo-scroll">
+        <div class="empty" id="memo-empty">
+          <div class="empty-icon">⚖</div>
+          <div class="empty-title">No analysis yet</div>
+          <div class="empty-sub">Describe a case above to search Ontario PI judgments</div>
+        </div>
+        <div id="memo-content" style="display:none"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right column: chat card -->
+  <div id="col-right">
+    <div class="card" id="card-chat">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-title-text">Case chat</span>
+        </div>
+        <span class="card-meta">grounded in retrieved cases</span>
+      </div>
+      <div id="chat-messages">
+        <div class="msg asst">
+          <div class="msg-label">Assistant</div>
+          <div class="msg-bubble">Run a case analysis first. I'll answer questions using only the comparable Ontario cases retrieved for your fact pattern.</div>
+        </div>
+      </div>
+      <div id="chat-footer">
+        <div class="quick-chips">
+          <button class="chip" onclick="chipSend('What is the threshold risk in this case?')">Threshold risk?</button>
+          <button class="chip" onclick="chipSend('Which case is most analogous to mine?')">Best comparable?</button>
+          <button class="chip" onclick="chipSend('What settlement range do these cases suggest?')">Settlement range?</button>
+          <button class="chip" onclick="chipSend('How do courts treat treatment gaps in cases like this?')">Treatment gaps?</button>
+        </div>
+        <div class="chat-row">
+          <textarea id="chat-input" placeholder="Ask about your case or the precedents…" onkeydown="chatKeydown(event)"></textarea>
+          <button id="chat-send" onclick="sendChat()" disabled>Send</button>
+        </div>
+        <div id="chat-hint">Run a case analysis to enable chat</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Memo fullscreen overlay -->
+<div id="memo-fullscreen-overlay">
+  <div id="memo-fullscreen-card">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="card-title-text">Research memo</span>
+      </div>
+      <span class="card-meta" id="memo-meta-fs"></span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn-icon" title="Minimize" onclick="closeMemoFullscreen()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 1v3.5a.5.5 0 0 1-.5.5H1M9 1v3.5a.5.5 0 0 0 .5.5H13M1 9h3.5a.5.5 0 0 1 .5.5V13M13 9H9.5a.5.5 0 0 0-.5.5V13"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div id="memo-fs-scroll"></div>
+  </div>
+</div>
+
+<!-- What-if modal -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div class="modal-title">What if…</div>
+    <div class="modal-hint">Describe a hypothetical change to your case. The analysis reruns with that change, your canonical case stays unchanged.</div>
+    <textarea class="modal-input" id="whatif-input" placeholder="e.g. she had no gap in physiotherapy treatment…"></textarea>
+    <div class="modal-actions">
+      <button class="btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="runWhatif()">Run hypothetical</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const state = {
+  canonicalQuery:'', currentMemo:'', currentStats:null,
+  currentStress:null, rerankedCases:[], chatHistory:[],
+  chatEnabled:false, running:false,
+};
+
+const API = '/api';
+
+async function apiFetch(path, body) {
+  const r = await fetch(API + path, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({ detail: r.statusText }));
+    throw new Error(err.detail || r.statusText);
+  }
+  return r.json();
+}
+
+// async function checkStatus() {
+//   try {
+//     const s = await fetch(API + '/status').then(r => r.json());
+//     const ob = document.getElementById('badge-ollama');
+//     const cb = document.getElementById('badge-cases');
+//     ob.textContent = s.ollama ? 'Ollama connected' : 'Ollama offline';
+//     ob.className   = 'badge ' + (s.ollama ? 'ok' : 'err');
+//     cb.textContent = s.case_count ? s.case_count + ' cases' : '— cases';
+//     cb.className   = 'badge ' + (s.chroma ? 'ok' : 'err');
+//   } catch(e) {
+//     const ob = document.getElementById('badge-ollama');
+//     ob.textContent = 'Server offline';
+//     ob.className = 'badge err';
+//   }
+// }
+
+document.getElementById('query-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) runQuery();
+});
+
+async function runQuery(queryOverride) {
+  const q = queryOverride || document.getElementById('query-input').value.trim();
+  if (!q || state.running) return;
+  setRunning(true, 'query');
+  setStatus('Searching Ontario PI decisions…');
+  showMemoLoading();
+  try {
+    const data = await apiFetch('/query', { lawyer_query: q });
+    state.canonicalQuery = q;
+    state.currentMemo    = data.memo;
+    state.currentStats   = data.stats;
+    state.rerankedCases  = data.cases;
+    state.chatHistory    = [];
+    renderMemo(data.memo, data.stats, data.cases);
+    enableChat(data.cases);
+    enableButtons();
+    showFactBar();
+    setStatus('');
+  } catch(e) {
+    setStatus('Error: ' + e.message);
+    showMemoError(e.message);
+  } finally {
+    setRunning(false, 'query');
+  }
+}
+
+document.getElementById('fact-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addFact();
+});
+
+async function addFact() {
+  const fact = document.getElementById('fact-input').value.trim();
+  if (!fact || state.running) return;
+  document.getElementById('fact-input').value = '';
+  setRunning(true, 'fact');
+  setStatus('Merging fact and updating analysis…');
+  showMemoLoading();
+  try {
+    let merged;
+    try {
+      const m = await apiFetch('/merge-fact', { canonical_query: state.canonicalQuery, new_fact: fact });
+      merged = m.merged_query;
+    } catch(_) {
+      merged = state.canonicalQuery + '\nAdditional fact: ' + fact;
+    }
+    state.canonicalQuery = merged;
+    document.getElementById('query-input').value = merged;
+    const data = await apiFetch('/query', { lawyer_query: merged });
+    state.currentMemo   = data.memo;
+    state.currentStats  = data.stats;
+    state.rerankedCases = data.cases;
+    state.chatHistory   = [];
+    renderMemo(data.memo, data.stats, data.cases, 'UPDATED MEMO');
+    enableChat(data.cases);
+    appendChatMsg('asst', 'Fact added: "' + fact + '". Analysis updated.');
+    setStatus('');
+  } catch(e) {
+    setStatus('Error: ' + e.message);
+    showMemoError(e.message);
+  } finally {
+    setRunning(false, 'fact');
+  }
+}
+
+function renderMemo(memo, stats, cases, label) {
+  document.getElementById('memo-empty').style.display = 'none';
+  const content = document.getElementById('memo-content');
+  content.style.display = 'block';
+  content.innerHTML = '';
+
+  if (label) {
+    const banner = document.createElement('div');
+    banner.className = 'hypobanner';
+    banner.textContent = label;
+    content.appendChild(banner);
+  }
+
+  if (stats) {
+    const wr    = parseFloat(stats.win_rate || 0);
+    const wrCls = wr >= 0.6 ? 'green' : wr >= 0.4 ? 'amber' : 'red';
+    const dmg   = stats.damages || {};
+    const med   = dmg.median ? '$' + dmg.median.toLocaleString() : 'N/A';
+    const bar   = document.createElement('div');
+    bar.className = 'stats-bar';
+    bar.innerHTML = `
+      <div class="scard"><div class="scard-label">Win rate</div><div class="scard-value ${wrCls}">${stats.win_rate_pct || 'N/A'}</div></div>
+      <div class="scard"><div class="scard-label">Median award</div><div class="scard-value">${med}</div></div>
+      <div class="scard"><div class="scard-label">Cases</div><div class="scard-value">${stats.total_cases || '—'}</div></div>
+      <div class="scard"><div class="scard-label">CN rate</div><div class="scard-value amber">${stats.cn_rate_pct || 'N/A'}</div></div>`;
+    content.appendChild(bar);
+  }
+
+  const sections = parseMemoSections(memo);
+  if (sections.length > 0) {
+    sections.forEach(sec => {
+      const div = document.createElement('div');
+      div.className = 'msec';
+      div.innerHTML = `
+        <div class="msec-header">
+          <span class="msec-num">${sec.num}</span>
+          <span class="msec-title-text">${escText(sec.title)}</span>
+        </div>
+        <div class="msec-body"><div class="mbody">${memoToHtml(sec.body)}</div></div>`;
+      content.appendChild(div);
+    });
+  } else {
+    const raw = document.createElement('div');
+    raw.className = 'memo-raw';
+    raw.innerHTML = '<div class="mbody">' + memoToHtml(memo) + '</div>';
+    content.appendChild(raw);
+  }
+
+  const n = cases ? cases.length : 0;
+  document.getElementById('memo-meta').textContent = n + ' cases · Ontario PI';
+  document.getElementById('memo-scroll').scrollTop = 0;
+}
+
+function parseMemoSections(memo) {
+  const sections = [];
+  const parts = memo.split(/^(?=##\s+\d+\.)/m);
+  for (const part of parts) {
+    const m = part.match(/^##\s+(\d+)\.\s+(.+)\n([\s\S]*)/);
+    if (m) sections.push({ num: m[1], title: m[2].trim(), body: m[3].trim() });
+  }
+  return sections;
+}
+
+function memoToHtml(text) {
+  const hasHtmlTags = /<(strong|em|b|i|ul|ol|li|br)\b/i.test(text);
+  if (hasHtmlTags) return sanitizeMemoHtml(text);
+  return markdownToHtml(text);
+}
+
+function sanitizeMemoHtml(html) {
+  const allowed = new Set(['strong','b','em','i','ul','ol','li','br','p']);
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  function clean(node) {
+    if (node.nodeType === 3) return;
+    if (node.nodeType === 1) {
+      if (!allowed.has(node.tagName.toLowerCase())) {
+        const span = document.createElement('span');
+        while (node.firstChild) span.appendChild(node.firstChild);
+        node.replaceWith(span); clean(span); return;
+      }
+      while (node.attributes.length) node.removeAttribute(node.attributes[0].name);
+      Array.from(node.childNodes).forEach(clean);
+    }
+  }
+  Array.from(div.childNodes).forEach(clean);
+  return div.innerHTML;
+}
+
+function markdownToHtml(text) {
+  let h = escText(text);
+  h = h.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/__([\s\S]*?)__/g,     '<strong>$1</strong>');
+  h = h.replace(/\*([\s\S]*?)\*/g,     '<em>$1</em>');
+  h = h.replace(/_([\s\S]*?)_/g,       '<em>$1</em>');
+  h = h.replace(/^(\d+)\.\s+(.+)$/gm,  '<li>$2</li>');
+  h = h.replace(/^[-*]\s+(.+)$/gm,     '<li>$1</li>');
+  h = h.replace(/(<li>[\s\S]*?<\/li>)+/g, m => '<ul>' + m + '</ul>');
+  h = h.replace(/\n\n+/g, '</p><p>');
+  h = h.replace(/\n/g, '<br>');
+  return '<p>' + h + '</p>';
+}
+
+function escText(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showMemoLoading() {
+  document.getElementById('memo-empty').style.display = 'none';
+  const c = document.getElementById('memo-content');
+  c.style.display = 'block';
+  c.innerHTML = `<div class="loading-state"><div class="loading-text">Running pipeline…</div><div class="loading-bar"><div class="loading-bar-inner"></div></div></div>`;
+}
+
+function showMemoError(msg) {
+  const c = document.getElementById('memo-content');
+  c.style.display = 'block';
+  c.innerHTML = `<div class="memo-error">Pipeline error: ${escText(msg)}</div>`;
+}
+
+function enableChat(cases) {
+  state.chatEnabled = true;
+  document.getElementById('chat-send').disabled = false;
+  updateChatHint();
+  appendChatMsg('asst', `Case loaded. I have ${cases.length} comparable Ontario decisions as context. Ask me anything about your case or the precedents.`);
+}
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+}
+
+function chipSend(text) {
+  document.getElementById('chat-input').value = text;
+  sendChat();
+}
+
+async function sendChat() {
+  if (!state.chatEnabled || state.running) return;
+  const q = document.getElementById('chat-input').value.trim();
+  if (!q) return;
+  document.getElementById('chat-input').value = '';
+  appendChatMsg('user', q);
+  const typingEl = appendChatMsg('asst', 'Thinking…', true);
+  document.getElementById('chat-send').disabled = true;
+  try {
+    const data = await apiFetch('/chat', {
+      canonical_query: state.canonicalQuery,
+      reranked_cases:  state.rerankedCases,
+      history:         state.chatHistory,
+      question:        q,
+    });
+    typingEl.remove();
+    appendChatMsg('asst', data.answer);
+    state.chatHistory.push({ question: q, answer: data.answer });
+    updateChatHint();
+  } catch(e) {
+    typingEl.remove();
+    appendChatMsg('asst', 'Error: ' + e.message);
+  } finally {
+    document.getElementById('chat-send').disabled = !state.chatEnabled;
+    document.getElementById('chat-input').focus();
+  }
+}
+
+function appendChatMsg(role, text, isTyping = false) {
+  const msgs  = document.getElementById('chat-messages');
+  const div   = document.createElement('div');
+  div.className = 'msg ' + role + (isTyping ? ' msg-typing' : '');
+  const label  = role === 'user' ? 'You' : 'Assistant';
+  const bubble = isTyping ? escText(text) : chatMarkdown(text);
+  div.innerHTML = `<div class="msg-label">${label}</div><div class="msg-bubble">${bubble}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function chatMarkdown(text) {
+  let h = escText(text);
+  h = h.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/\*([\s\S]*?)\*/g, '<em>$1</em>');
+  h = h.replace(/\n/g, '<br>');
+  return h;
+}
+
+function updateChatHint() {
+  document.getElementById('chat-hint').textContent =
+    `${state.rerankedCases.length} cases loaded · ${state.chatHistory.length}/6 turns`;
+}
+
+async function runStressTest() {
+  if (!state.currentMemo || state.running) return;
+  setRunning(true, 'query');
+  setStatus('Running adverse stress test…');
+  try {
+    const data = await apiFetch('/stress-test', { canonical_query: state.canonicalQuery, memo: state.currentMemo });
+    state.currentStress = data.stress_test;
+    appendChatMsg('danger', '**Adverse stress test**\n\n' + data.stress_test);
+    setStatus('');
+  } catch(e) { setStatus('Stress test failed: ' + e.message); }
+  finally { setRunning(false, 'query'); }
+}
+
+function openWhatif() {
+  document.getElementById('whatif-input').value = '';
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('whatif-input').focus(), 50);
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+document.getElementById('whatif-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) runWhatif();
+});
+
+async function runWhatif() {
+  const mod = document.getElementById('whatif-input').value.trim();
+  if (!mod) return;
+  closeModal();
+  setRunning(true, 'query');
+  setStatus('Running hypothetical…');
+  try {
+    const data = await apiFetch('/whatif', { canonical_query: state.canonicalQuery, modification: mod, baseline_stats: state.currentStats });
+    if (data.diff_summary) appendChatMsg('whatif', '**Hypothetical: "' + mod + '"**\n\n' + data.diff_summary);
+    if (data.memo) {
+      renderMemo(data.memo, data.stats, state.rerankedCases);
+      const content = document.getElementById('memo-content');
+      const banner  = document.createElement('div');
+      banner.className = 'hypobanner';
+      banner.innerHTML = `<strong>Hypothetical memo</strong> — canonical case unchanged. <a href="#" onclick="restoreCanonical(event)">Restore original →</a>`;
+      content.prepend(banner);
+    }
+    setStatus('');
+  } catch(e) { setStatus('What-if failed: ' + e.message); }
+  finally { setRunning(false, 'query'); }
+}
+
+function restoreCanonical(e) {
+  e.preventDefault();
+  renderMemo(state.currentMemo, state.currentStats, state.rerankedCases);
+}
+
+async function runExport() {
+  if (!state.currentMemo || state.running) return;
+  setStatus('Generating PDF…');
+  try {
+    const r = await fetch(API + '/export', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ canonical_query: state.canonicalQuery, memo: state.currentMemo, stats: state.currentStats, stress_test: state.currentStress })
+    });
+    if (!r.ok) throw new Error((await r.json()).detail);
+    const blob = await r.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'pi_memo.pdf'; a.click();
+    URL.revokeObjectURL(url);
+    setStatus('PDF downloaded');
+    setTimeout(() => setStatus(''), 3000);
+  } catch(e) { setStatus('Export failed: ' + e.message); }
+}
+
+function newCase() {
+  Object.assign(state, { canonicalQuery:'', currentMemo:'', currentStats:null, currentStress:null, rerankedCases:[], chatHistory:[], chatEnabled:false, running:false });
+  document.getElementById('query-input').value = '';
+  document.getElementById('fact-input').value  = '';
+  document.getElementById('memo-empty').style.display   = 'flex';
+  document.getElementById('memo-content').style.display = 'none';
+  document.getElementById('memo-meta').textContent = '—';
+  document.getElementById('fact-bar').className = '';
+  document.getElementById('chat-messages').innerHTML = `<div class="msg asst"><div class="msg-label">Assistant</div><div class="msg-bubble">Run a case analysis first. I'll answer questions using only the comparable Ontario cases retrieved for your fact pattern.</div></div>`;
+  document.getElementById('chat-send').disabled = true;
+  document.getElementById('chat-hint').textContent = 'Run a case analysis to enable chat';
+  disableButtons(); setStatus('');
+}
+
+function setRunning(on, target) {
+  state.running = on;
+  document.getElementById('btn-run').disabled = on;
+  document.getElementById('spinner-query').style.display = (on && target === 'query') ? 'block' : 'none';
+  document.getElementById('spinner-fact').style.display  = (on && target === 'fact')  ? 'block' : 'none';
+  const bf = document.getElementById('btn-fact');
+  if (bf) bf.disabled = on;
+}
+function setStatus(msg) { document.getElementById('run-status').textContent = msg; }
+function showFactBar()   { document.getElementById('fact-bar').className = 'visible'; }
+function enableButtons() { ['btn-worstcase','btn-whatif','btn-export'].forEach(id => document.getElementById(id).disabled = false); }
+function disableButtons(){ ['btn-worstcase','btn-whatif','btn-export'].forEach(id => document.getElementById(id).disabled = true); }
+
+function openMemoFullscreen() {
+  const overlay = document.getElementById('memo-fullscreen-overlay');
+  const fsScroll = document.getElementById('memo-fs-scroll');
+  const meta = document.getElementById('memo-meta').textContent;
+  document.getElementById('memo-meta-fs').textContent = meta;
+  // Clone the memo content into the fullscreen scroll area
+  const srcEmpty   = document.getElementById('memo-empty');
+  const srcContent = document.getElementById('memo-content');
+  fsScroll.innerHTML = '';
+  if (srcContent.style.display !== 'none') {
+    fsScroll.appendChild(srcContent.cloneNode(true));
+  } else {
+    const clone = srcEmpty.cloneNode(true);
+    clone.style.display = 'flex';
+    fsScroll.appendChild(clone);
+  }
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMemoFullscreen() {
+  document.getElementById('memo-fullscreen-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('memo-fullscreen-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('memo-fullscreen-overlay')) closeMemoFullscreen();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeMemoFullscreen();
+});
+
+// checkStatus();
+document.getElementById('query-input').focus();
+
+document.getElementById('chat-input').addEventListener('input', function () {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+});
+
+
+
+</script>
+</body>
+</html>

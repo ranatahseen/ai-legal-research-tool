@@ -1,10 +1,10 @@
 # server.py
-# ─────────────────────────────────────────────────────────────────────────────
+
 # FastAPI backend for the PI Case Stress-Tester browser UI.
-#
+
 # Wraps the existing query pipeline — no logic lives here.
 # All pipeline logic stays in query/pipeline.py, query/chat.py, etc.
-#
+
 # Endpoints:
 #   POST /api/query          — run full pipeline, return memo + stats + cases
 #   POST /api/chat           — single chat turn, return assistant response
@@ -13,11 +13,11 @@
 #   POST /api/export         — generate PDF, return file download
 #   GET  /api/status         — health check (Ollama + Chroma)
 #   GET  /                   — serve the UI
-#
+
 # Run with:
 #   pip install fastapi uvicorn
 #   python server.py
-# ─────────────────────────────────────────────────────────────────────────────
+
 
 import os
 import sys
@@ -34,7 +34,6 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-# ── Add project root to path so query/ is importable ─────────────────────────
 sys.path.insert(0, str(Path(__file__).parent))
 
 from query.pipeline  import run_query, run_what_if_with_diff
@@ -42,9 +41,6 @@ from query.followup  import generate_adverse_stress_test, merge_whatif_into_quer
 from query.chat      import build_chat_context, get_chat_response
 from query.exporter  import export_pdf
 from query.config    import OLLAMA_URL, MODEL_NAME, CHROMA_PATH, CHROMA_COLLECTION
-
-
-# ── App setup ─────────────────────────────────────────────────────────────────
 
 app = FastAPI(title="PI Case Stress-Tester", version="1.0.0")
 
@@ -58,8 +54,6 @@ app.add_middleware(
 # Serve the UI at /
 UI_FILE = Path(__file__).parent / "ui.html"
 
-
-# ── Request / Response models ─────────────────────────────────────────────────
 
 class QueryRequest(BaseModel):
     lawyer_query: str
@@ -90,8 +84,6 @@ class ExportRequest(BaseModel):
     stats:           dict
     stress_test:     Optional[str] = None
 
-
-# ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_ui():
@@ -227,7 +219,6 @@ async def whatif_endpoint(req: WhatIfRequest):
     if not req.modification.strip():
         raise HTTPException(status_code=400, detail="modification cannot be empty")
 
-    # Merge the modification into the canonical query if not pre-merged
     merged = req.merged_query
     if not merged:
         merged = merge_whatif_into_query(req.canonical_query, req.modification)
@@ -299,8 +290,6 @@ async def export_endpoint(req: ExportRequest):
     )
 
 
-# ── Entry point ───────────────────────────────────────────────────────────────
-
 if __name__ == "__main__":
     print("\n" + "=" * 56)
     print("  PI CASE STRESS-TESTER — Web Server")
@@ -315,5 +304,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         reload=False,
-        log_level="warning",   # suppress request noise — errors still show
+        log_level="warning", 
     )
